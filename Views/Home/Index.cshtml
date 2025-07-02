@@ -1,8 +1,39 @@
-﻿@{
+﻿@model IEnumerable<SavingsApp.Models.Customer>
+
+@{
     ViewData["Title"] = "Home Page";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <h2 class="mb-4">Clientes registrados</h2>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info text-center">
+            No hay clientes registrados.
+        </div>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            @foreach (var customer in Model)
+            {
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body text-center">
+                            <div class="mb-3">
+                                <i class="bi bi-person-circle fs-1"></i>
+                            </div>
+                            <h5 class="card-title">@customer.Name</h5>
+                            <p class="card-text">
+                                <strong>Email:</strong> @customer.Email <br />
+                                <strong>Teléfono:</strong> @customer.PhoneNumber
+                            </p>
+                            <button class="btn btn-primary w-100" onclick="#">Ver cuentas</button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
 </div>
