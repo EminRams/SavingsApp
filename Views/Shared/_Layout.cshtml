@@ -40,7 +40,7 @@
                                 asp-action="Index">Auditoria</a>
                         </li>
                     </ul>
-                    <form action="/Auth/Logout" method="post" class="form-inline text-muted">
+                    <form asp-controller="Auth" asp-action="logout" class="form-inline text-muted">
                         <button type="submit" class="btn btn-link nav-link">Cerrar Sesion
                             <i class="bi bi-box-arrow-right"></i>
                         </button>

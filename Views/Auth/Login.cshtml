@@ -1,4 +1,5 @@
-﻿@{
+﻿@model SavingsApp.Models.User
+@{
     ViewData["Title"] = "Iniciar Sesión";
 
     Layout = "~/Views/Shared/_AuthLayout.cshtml";
@@ -10,7 +11,7 @@
         <div class="alert alert-primary">@ViewBag.ErrorMessage</div>
     }
 
-    <form id="login" method="post" class="p-5 rounded shadow-lg">
+    <form id="login" asp-action="Login" class="p-5 rounded shadow-lg">
         <h1 class="text-center">Iniciar Sesión</h1>
 
         <div class="form-group pt-5">
