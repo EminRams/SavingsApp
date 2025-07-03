@@ -29,7 +29,8 @@
                                 <strong>Email:</strong> @customer.Email <br />
                                 <strong>Teléfono:</strong> @customer.PhoneNumber
                             </p>
-                            <button class="btn btn-primary w-100" onclick="#">Gestionar cuentas</button>
+                            <a class="btn btn-primary w-100" asp-controller="Account" asp-action="Details"
+                                asp-route-id="@customer.Id">Gestionar cuentas</a>
                         </div>
                     </div>
                 </div>
