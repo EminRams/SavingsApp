@@ -38,17 +38,7 @@ CREATE TABLE Transactions (
     savings_account_id INT NOT NULL,
     type NVARCHAR(10) NOT NULL CHECK (type IN ('deposit', 'withdrawal')),
     amount DECIMAL(18,6) NOT NULL CHECK (Amount > 0),
-    transaction_date DATETIME2 GETDATE() NOT NULL,
+    transaction_date DATETIME2 DEFAULT GETDATE() NOT NULL,
     created_at DATETIME2 DEFAULT GETDATE(),
     FOREIGN KEY (savings_account_id) REFERENCES SavingsAccounts(id)
-);
-
--- Tabla: AuditLogs (registro de auditoría)
-CREATE TABLE AuditLogs (
-    id INT PRIMARY KEY IDENTITY(1, 1),
-    customer_id INT,
-    action NVARCHAR(100) NOT NULL,
-    details NVARCHAR(200),
-    created_at DATETIME2 DEFAULT GETDATE(),
-    FOREIGN KEY (customer_id) REFERENCES Customers(id)
 );
