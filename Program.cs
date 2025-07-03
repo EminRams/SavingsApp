@@ -58,6 +58,7 @@ app.MapControllerRoute(
 
 using var scope = app.Services.CreateScope();
 var context = scope.ServiceProvider.GetRequiredService<SavingsAppContext>();
-DataSeeder.Initialize(context);
+DataSeeder.SeedCustomers(context);
+DataSeeder.SeedUsers(context);
 
 app.Run();
