@@ -1,0 +1,154 @@
+@model IEnumerable<SavingsApp.Models.Transaction>
+
+@{
+    ViewData["Title"] = "Historial de Transacciones";
+
+    var balanceAfterTransaction = new Dictionary<int, decimal>();
+}
+
+<h1 class="mt-lg-4">Historial de Transacciones</h1>
+
+<div class="table-responsive border-table">
+    <table class="table table-hover text-justify m-0">
+        <thead class="text-center">
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Type)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.SavingsAccount)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.SavingsAccount.Customer)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Amount)
+                </th>
+                <th>
+                    Saldo Resultante
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.TransactionDate)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.CreatedAt)
+                </th>
+
+            </tr>
+        </thead>
+        <tbody class="table-group-divider text-center">
+            @foreach (var item in Model)
+            {
+                @* Calcular el saldo resultante luego de cada transaccion *@
+                int accountId = item.SavingsAccount.Id;
+
+                if (!balanceAfterTransaction.ContainsKey(accountId))
+                {
+                    balanceAfterTransaction[accountId] = 0;
+                }
+
+                // Aplicar la transacción al saldo
+                if (item.Type == "deposit")
+                {
+                    balanceAfterTransaction[accountId] += item.Amount;
+                }
+                else if (item.Type == "withdrawal")
+                {
+                    balanceAfterTransaction[accountId] -= item.Amount;
+                }
+
+                <tr>
+                    <td>
+                        @(item.Type == "deposit" ? "Depósito" : item.Type == "withdrawal" ? "Retiro" : item.Type)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.SavingsAccount.AccountNumber)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.SavingsAccount.Customer!.Name)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Amount)
+                    </td>
+                    <td>
+                        <strong>@balanceAfterTransaction[accountId].ToString("C")</strong>
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.TransactionDate, "{0:dd/MM/yyyy HH:mm:ss}")
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.CreatedAt, "{0:dd/MM/yyyy HH:mm:ss}")
+                    </td>
+
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<nav class="d-flex justify-content-center align-items-center my-5">
+    <form method="get" class="d-inline me-2">
+        <label for="pageSize">Mostrar: </label>
+        <select name="pageSize" class="form-control d-inline w-auto" onchange="this.form.submit()">
+            <option value="5" selected="@(ViewBag.PageSize == 5)">5</option>
+            <option value="10" selected="@(ViewBag.PageSize == 10)">10</option>
+            <option value="50" selected="@(ViewBag.PageSize == 50)">50</option>
+        </select>
+    </form>
+    <ul class="pagination justify-content-center m-0">
+        <li class="page-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
+            <a class="page-link @(ViewBag.CurrentPage == 1 ? "text-secondary" : "text-primary")" asp-action="Index"
+                asp-route-page="@(ViewBag.CurrentPage - 1)" asp-route-pageSize="@ViewBag.PageSize"><i
+                    class="bi bi-arrow-left"></i></a>
+        </li>
+        @{
+            int totalPages = ViewBag.TotalPages;
+            int currentPage = ViewBag.CurrentPage;
+            int maxPagesToShow = 3; // Máximo de páginas visibles
+            int startPage = Math.Max(1, currentPage - 2);
+            int endPage = Math.Min(totalPages, startPage + maxPagesToShow - 1);
+
+            // Ajustar el rango si el final se sale del total de páginas
+            if (endPage - startPage + 1 < maxPagesToShow)
+            {
+                startPage = Math.Max(1, endPage - maxPagesToShow + 1);
+            }
+        }
+
+        @if (startPage > 1)
+        {
+            <li class="page-item">
+                <a class="page-link text-secondary" asp-action="Index" asp-route-page="1"
+                    asp-route-pageSize="@ViewBag.PageSize">1</a>
+            </li>
+            <li class="page-item disabled">
+                <span class="page-link">..</span>
+            </li>
+        }
+
+        @for (var i = startPage; i <= endPage; i++)
+        {
+            <li class="page-item @(currentPage == i ? "active" : "")">
+                <a class="page-link @(i == currentPage ? "bg-primary text-light" : "text-secondary")" asp-action="Index"
+                    asp-route-page="@i" asp-route-pageSize="@ViewBag.PageSize">@i</a>
+            </li>
+        }
+
+        @if (endPage < totalPages)
+        {
+            <li class="page-item disabled">
+                <span class="page-link">..</span>
+            </li>
+            <li class="page-item">
+                <a class="page-link text-secondary" asp-action="Index" asp-route-page="@totalPages"
+                    asp-route-pageSize="@ViewBag.PageSize">@totalPages</a>
+            </li>
+        }
+
+        <li class="page-item @(ViewBag.CurrentPage == ViewBag.TotalPages ? "disabled" : "")">
+            <a class="page-link @(ViewBag.CurrentPage == ViewBag.TotalPages ? "text-secondary" : "text-primary")"
+                asp-action="Index" asp-route-page="@(ViewBag.CurrentPage + 1)" asp-route-pageSize="@ViewBag.PageSize"><i
+                    class="bi bi-arrow-right"></i></a>
+        </li>
+    </ul>
+</nav>

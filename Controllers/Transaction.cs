@@ -15,7 +15,28 @@ namespace SavingsApp.Controllers
             _context = context;
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Index(int pageSize = 10, int page = 1)
+        {
+            var transactions = await _context.Transactions
+                .OrderBy(t => t.TransactionDate)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Include(t => t.SavingsAccount)
+                .ThenInclude(a => a.Customer)
+                .ToListAsync();
+
+            var totalTransactions = await _context.Transactions.CountAsync();
+
+            ViewBag.CurrentPage = page;
+            ViewBag.PageSize = pageSize;
+            ViewBag.TotalPages = (int)Math.Ceiling(totalTransactions / (double)pageSize);
+
+            return View(transactions);
+        }
+
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(int AccountId, string type, decimal amount)
         {
             var account = await _context.SavingsAccounts.FindAsync(AccountId);
