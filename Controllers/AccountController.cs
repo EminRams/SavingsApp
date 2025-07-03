@@ -37,6 +37,7 @@ namespace SavingsApp.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(int? customerId, string? description)
         {
             var customer = await _context.Customers.FindAsync(customerId);
@@ -58,6 +59,26 @@ namespace SavingsApp.Controllers
 
             return RedirectToAction("Details", new { id = customer.Id });
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, int customerId, string description, string accountNumber, decimal balance)
+        {
+            var account = await _context.SavingsAccounts.FindAsync(id);
+
+            if (account == null)
+                return NotFound();
+
+            account.Description = description;
+            account.AccountNumber = accountNumber;
+            account.Balance = balance;
+
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Details", new { id = customerId });
+        }
+
+
 
         public static string GenerateAccountNumber(SavingsAppContext context)
         {

@@ -29,7 +29,20 @@
             <div class="col">
                 <div class="card h-100 border-primary shadow">
                     <div class="card-body">
-                        <h5 class="card-title pb-3">Número de Cuenta: @account.AccountNumber</h5>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="card-title">Número de Cuenta: @account.AccountNumber</h5>
+                            <div>
+                                <button type="button" class="btn btn-sm btn-outline-warning" title="Editar"
+                                    data-bs-toggle="modal" data-bs-target="#editModal-@account.Id">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-danger" title="Eliminar"
+                                    data-bs-toggle="modal" data-bs-target="#deleteModal-@account.Id">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+
                         <p class="card-text">
                             <strong>Balance:</strong> L. @account.Balance.ToString("N2") <br />
                             @if (!string.IsNullOrEmpty(account.Description))
@@ -42,6 +55,9 @@
                             asp-route-type="withdrawal">Depositar</a>
                         <a class="btn btn-outline-danger" asp-controller="Transaction" action="Create"
                             asp-route-type="withdrawal">Retirar</a>
+
+                        @* modal de edición *@
+                        @await Html.PartialAsync("_EditModal", account)
                     </div>
                 </div>
             </div>
@@ -55,4 +71,5 @@ else
     </div>
 }
 
+@* modal de creación *@
 @await Html.PartialAsync("_CreateModal", Model.Id)

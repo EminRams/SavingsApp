@@ -14,7 +14,7 @@ public partial class SavingsAccount
 
     public DateTime? CreatedAt { get; set; }
 
-    public virtual Customer Customer { get; set; } = null!;
+    public virtual Customer? Customer { get; set; }
 
     public virtual ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
 }
