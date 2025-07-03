@@ -10,15 +10,19 @@ namespace SavingsApp.Controllers
 {
     public class AuthController : Controller
     {
+        private readonly ILogger<AuthController> _logger;
+
         private readonly SavingsAppContext _context;
 
         private readonly IToastNotification _toastNotification;
 
-        public AuthController(SavingsAppContext context, IToastNotification toastNotification)
+        public AuthController(SavingsAppContext context, IToastNotification toastNotification, ILogger<AuthController> logger)
         {
             _context = context;
 
             _toastNotification = toastNotification;
+
+            _logger = logger;
         }
 
         [HttpGet]
@@ -48,10 +52,12 @@ namespace SavingsApp.Controllers
 
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
+                _logger.LogInformation("{Username} ha iniciado sesión en el sistema", user.Username);
+
                 return RedirectToAction("Index", "Home");
             }
 
-            // ModelState.AddModelError(string.Empty, "Credenciales Inválidas");
+            _logger.LogInformation("Intento de inico de sesión en el sistema");
             _toastNotification.AddWarningToastMessage("Credendiales Inválidas");
 
             return RedirectToAction("Login", "Auth");
@@ -62,6 +68,8 @@ namespace SavingsApp.Controllers
         {
             // Cerrar sesión y eliminar el cookie de autenticación
             HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+            _logger.LogInformation("Un usuario se ha desconectado del sistema");
 
             return RedirectToAction("Index", "Home");
         }

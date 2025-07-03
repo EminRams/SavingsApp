@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NToastNotify;
+using NToastNotify.Helpers;
 using SavingsApp.Models;
 using SavingsApp.Models.ViewModels;
 
@@ -10,15 +11,17 @@ namespace SavingsApp.Controllers
     [Authorize]
     public class TransactionController : Controller
     {
+        private readonly ILogger<TransactionController> _logger;
+
         private readonly SavingsAppContext _context;
 
         private readonly IToastNotification _toastNotification;
 
-        public TransactionController(SavingsAppContext context, IToastNotification toastNotification)
+        public TransactionController(SavingsAppContext context, IToastNotification toastNotification, ILogger<TransactionController> logger)
         {
             _context = context;
-
             _toastNotification = toastNotification;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -78,65 +81,74 @@ namespace SavingsApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(int AccountId, string type, decimal amount, DateTime? transactionDate)
         {
-            var account = await _context.SavingsAccounts.FindAsync(AccountId);
-
             transactionDate ??= DateTime.Now;
+            var account = await _context.SavingsAccounts.FindAsync(AccountId);
 
             if (account == null)
                 return NotFound();
 
-            // Validar monto negativo
-            if (amount <= 0)
+            if (ModelState.IsValid)
             {
-                _toastNotification.AddErrorToastMessage("Monto Inválido");
+
+                // Validar monto negativo
+                if (amount <= 0)
+                {
+                    _toastNotification.AddErrorToastMessage("Monto Inválido");
+                    _logger.LogWarning("Intento de retiro con monto invalido. Cuenta: {account}", account.ToJson());
+                    return RedirectToAction("Details", "Account", new { id = account.CustomerId });
+                }
+
+                if (type == "withdrawal")
+                {
+                    // Validar que no supere $5000 diarios
+                    var todayWithdrawals = await _context.Transactions
+                        .Where(t => t.SavingsAccountId == AccountId &&
+                                    t.Type == "withdrawal" &&
+                                    t.TransactionDate.Date == transactionDate)
+                        .SumAsync(t => t.Amount);
+
+                    if (todayWithdrawals + amount > 5000)
+                    {
+                        _toastNotification.AddErrorToastMessage("No puede retirar más de $5000 diarios.");
+                        _logger.LogWarning("Limite diario de $5000 alcanzado. Cuenta: {account}", account.ToJson());
+                        return RedirectToAction("Details", "Account", new { id = account.CustomerId });
+                    }
+
+                    // Validar que no supere el saldo de la cuenta
+                    if (amount > account.Balance)
+                    {
+                        _toastNotification.AddErrorToastMessage("Saldo insuficiente para realizar el retiro.");
+                        _logger.LogWarning("Intento de retiro con saldo insuficiente. Cuenta: {account}", account.ToJson());
+                        return RedirectToAction("Details", "Account", new { id = account.CustomerId });
+                    }
+
+                    // Actualizar el saldo de la cuenta
+                    account.Balance -= amount;
+                }
+                else
+                {
+                    // Actualizar el saldo de la cuenta
+                    account.Balance += amount;
+                }
+
+                var transaction = new Transaction
+                {
+                    SavingsAccountId = AccountId,
+                    Amount = amount,
+                    Type = type,
+                    TransactionDate = transactionDate.Value
+                };
+
+                _context.Transactions.Add(transaction);
+                await _context.SaveChangesAsync();
+
+                _toastNotification.AddSuccessToastMessage("Transacción realizada correctamente.");
+                _logger.LogWarning("Transaccion realizada en Cuenta: {account}", account);
                 return RedirectToAction("Details", "Account", new { id = account.CustomerId });
             }
 
-            if (type == "withdrawal")
-            {
-                // Validar que no supere $5000 diarios
-                var todayWithdrawals = await _context.Transactions
-                    .Where(t => t.SavingsAccountId == AccountId &&
-                                t.Type == "withdrawal" &&
-                                t.TransactionDate.Date == transactionDate)
-                    .SumAsync(t => t.Amount);
-
-                if (todayWithdrawals + amount > 5000)
-                {
-                    _toastNotification.AddErrorToastMessage("No puede retirar más de $5000 diarios.");
-                    return RedirectToAction("Details", "Account", new { id = account.CustomerId });
-                }
-
-                // Validar que no supere el saldo de la cuenta
-                if (amount > account.Balance)
-                {
-                    _toastNotification.AddErrorToastMessage("Saldo insuficiente para realizar el retiro.");
-                    return RedirectToAction("Details", "Account", new { id = account.CustomerId });
-                }
-
-                // Actualizar el saldo de la cuenta
-                account.Balance -= amount;
-            }
-            else
-            {
-                // Actualizar el saldo de la cuenta
-                account.Balance += amount;
-            }
-
-            var transaction = new Transaction
-            {
-                SavingsAccountId = AccountId,
-                Amount = amount,
-                Type = type,
-                TransactionDate = transactionDate.Value
-            };
-
-
-            _context.Transactions.Add(transaction);
-            await _context.SaveChangesAsync();
-
-            _toastNotification.AddSuccessToastMessage("Transacción realizada correctamente.");
-
+            _toastNotification.AddSuccessToastMessage("Error al realizar la transacción.");
+            _logger.LogWarning("Intento fallido al realizar transaccion en Cuenta: {account}", account);
             return RedirectToAction("Details", "Account", new { id = account.CustomerId });
         }
 
