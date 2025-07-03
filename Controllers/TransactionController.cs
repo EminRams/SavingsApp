@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SavingsApp.Models;
+using SavingsApp.Models.ViewModels;
 
 namespace SavingsApp.Controllers
 {
@@ -18,21 +19,54 @@ namespace SavingsApp.Controllers
         [HttpGet]
         public async Task<IActionResult> Index(int pageSize = 10, int page = 1)
         {
-            var transactions = await _context.Transactions
-                .OrderBy(t => t.TransactionDate)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
+            var allTransactions = await _context.Transactions
                 .Include(t => t.SavingsAccount)
                 .ThenInclude(a => a.Customer)
+                .OrderBy(t => t.TransactionDate)
                 .ToListAsync();
 
-            var totalTransactions = await _context.Transactions.CountAsync();
+            // Calcular balance acumulados por cuenta
+            var balance = new Dictionary<int, decimal>();
+            var transactionVMs = new List<TransactionViewModel>();
+
+            foreach (var t in allTransactions)
+            {
+                var accountId = t.SavingsAccount.Id;
+
+                if (!balance.ContainsKey(accountId))
+                    balance[accountId] = 0;
+
+                if (t.Type == "deposit")
+                    balance[accountId] += t.Amount;
+                else if (t.Type == "withdrawal")
+                    balance[accountId] -= t.Amount;
+
+                transactionVMs.Add(new TransactionViewModel
+                {
+                    Id = t.Id,
+                    Type = t.Type,
+                    Amount = t.Amount,
+                    TransactionDate = t.TransactionDate,
+                    CreatedAt = t.CreatedAt,
+                    SavingsAccount = t.SavingsAccount,
+                    BalanceAfterTransaction = balance[accountId]
+                });
+            }
+
+            // Aplicar paginación
+            int total = transactionVMs.Count;
+            int totalPages = (int)Math.Ceiling(total / (double)pageSize);
+
+            var paginated = transactionVMs
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
 
             ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = totalPages;
             ViewBag.PageSize = pageSize;
-            ViewBag.TotalPages = (int)Math.Ceiling(totalTransactions / (double)pageSize);
 
-            return View(transactions);
+            return View(paginated);
         }
 
         [HttpPost]

@@ -1,9 +1,7 @@
-@model IEnumerable<SavingsApp.Models.Transaction>
+@model IEnumerable<SavingsApp.Models.ViewModels.TransactionViewModel>
 
 @{
     ViewData["Title"] = "Historial de Transacciones";
-
-    var balanceAfterTransaction = new Dictionary<int, decimal>();
 }
 
 <h1 class="mt-lg-4">Historial de Transacciones</h1>
@@ -39,24 +37,6 @@
         <tbody class="table-group-divider text-center">
             @foreach (var item in Model)
             {
-                @* Calcular el saldo resultante luego de cada transaccion *@
-                int accountId = item.SavingsAccount.Id;
-
-                if (!balanceAfterTransaction.ContainsKey(accountId))
-                {
-                    balanceAfterTransaction[accountId] = 0;
-                }
-
-                // Aplicar la transacción al saldo
-                if (item.Type == "deposit")
-                {
-                    balanceAfterTransaction[accountId] += item.Amount;
-                }
-                else if (item.Type == "withdrawal")
-                {
-                    balanceAfterTransaction[accountId] -= item.Amount;
-                }
-
                 <tr>
                     <td>
                         @(item.Type == "deposit" ? "Depósito" : item.Type == "withdrawal" ? "Retiro" : item.Type)
@@ -71,7 +51,7 @@
                         @Html.DisplayFor(modelItem => item.Amount)
                     </td>
                     <td>
-                        <strong>@balanceAfterTransaction[accountId].ToString("C")</strong>
+                        <strong>@item.BalanceAfterTransaction.ToString("C")</strong>
                     </td>
                     <td>
                         @Html.DisplayFor(modelItem => item.TransactionDate, "{0:dd/MM/yyyy HH:mm:ss}")
