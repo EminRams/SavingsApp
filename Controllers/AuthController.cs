@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NToastNotify;
 using SavingsApp.Models;
 using System.Security.Claims;
 
@@ -11,9 +12,13 @@ namespace SavingsApp.Controllers
     {
         private readonly SavingsAppContext _context;
 
-        public AuthController(SavingsAppContext context)
+        private readonly IToastNotification _toastNotification;
+
+        public AuthController(SavingsAppContext context, IToastNotification toastNotification)
         {
             _context = context;
+
+            _toastNotification = toastNotification;
         }
 
         [HttpGet]
@@ -46,8 +51,10 @@ namespace SavingsApp.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-            ModelState.AddModelError(string.Empty, "Credenciales Inválidas");
-            return View();
+            // ModelState.AddModelError(string.Empty, "Credenciales Inválidas");
+            _toastNotification.AddWarningToastMessage("Credendiales Inválidas");
+
+            return RedirectToAction("Login", "Auth");
         }
 
         [HttpPost]

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NToastNotify;
 using SavingsApp.Models;
 
 namespace SavingsApp.Controllers
@@ -10,9 +11,12 @@ namespace SavingsApp.Controllers
     {
         private readonly SavingsAppContext _context;
 
-        public AccountController(SavingsAppContext context)
+        private readonly IToastNotification _toastNotification;
+
+        public AccountController(SavingsAppContext context, IToastNotification toastNotification)
         {
             _context = context;
+            _toastNotification = toastNotification;
         }
 
         [HttpGet]
@@ -57,6 +61,8 @@ namespace SavingsApp.Controllers
             _context.SavingsAccounts.Add(account);
             await _context.SaveChangesAsync();
 
+            _toastNotification.AddSuccessToastMessage("Cuenta de ahorro creada correctamente.");
+
             return RedirectToAction("Details", new { id = customer.Id });
         }
 
@@ -74,6 +80,8 @@ namespace SavingsApp.Controllers
             account.Balance = balance;
 
             await _context.SaveChangesAsync();
+
+            _toastNotification.AddSuccessToastMessage("Cuenta de ahorro actualizada correctamente.");
 
             return RedirectToAction("Details", new { id = customerId });
         }

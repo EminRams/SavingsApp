@@ -1,13 +1,22 @@
 
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using NToastNotify;
 using SavingsApp.Data;
 using SavingsApp.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews()
+    .AddNToastNotifyToastr(new ToastrOptions()
+    {
+        ProgressBar = true,
+        PositionClass = ToastPositions.TopRight,
+        TimeOut = 4000,
+        PreventDuplicates = true,
+        CloseButton = true,
+    });
 
 builder.Services.AddDbContext<SavingsAppContext>(options =>
 {
@@ -51,6 +60,9 @@ app.UseSession();
 // Middleware
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Toast Notifications
+app.UseNToastNotify();
 
 app.MapControllerRoute(
     name: "default",

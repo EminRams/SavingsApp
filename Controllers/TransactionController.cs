@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NToastNotify;
 using SavingsApp.Models;
 using SavingsApp.Models.ViewModels;
 
@@ -11,9 +12,13 @@ namespace SavingsApp.Controllers
     {
         private readonly SavingsAppContext _context;
 
-        public TransactionController(SavingsAppContext context)
+        private readonly IToastNotification _toastNotification;
+
+        public TransactionController(SavingsAppContext context, IToastNotification toastNotification)
         {
             _context = context;
+
+            _toastNotification = toastNotification;
         }
 
         [HttpGet]
@@ -83,6 +88,7 @@ namespace SavingsApp.Controllers
             // Validar monto negativo
             if (amount <= 0)
             {
+                _toastNotification.AddErrorToastMessage("Monto Inválido");
                 return RedirectToAction("Details", "Account", new { id = account.CustomerId });
             }
 
@@ -97,13 +103,14 @@ namespace SavingsApp.Controllers
 
                 if (todayWithdrawals + amount > 5000)
                 {
-                    var restante = 5000 - todayWithdrawals; // mostrarlo en una alerta
+                    _toastNotification.AddErrorToastMessage("No puede retirar más de $5000 diarios.");
                     return RedirectToAction("Details", "Account", new { id = account.CustomerId });
                 }
 
                 // Validar que no supere el saldo de la cuenta
                 if (amount > account.Balance)
                 {
+                    _toastNotification.AddErrorToastMessage("Saldo insuficiente para realizar el retiro.");
                     return RedirectToAction("Details", "Account", new { id = account.CustomerId });
                 }
 
@@ -127,6 +134,8 @@ namespace SavingsApp.Controllers
 
             _context.Transactions.Add(transaction);
             await _context.SaveChangesAsync();
+
+            _toastNotification.AddSuccessToastMessage("Transacción realizada correctamente.");
 
             return RedirectToAction("Details", "Account", new { id = account.CustomerId });
         }

@@ -25,15 +25,11 @@
                     <ul class="navbar-nav flex-grow-1 gap-3 ms-3">
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home"
-                                asp-action="Index">Inicio</a>
+                                asp-action="Index">Clientes</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Transaction" asp-action="Index">
                                 Historial de Transacciones</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Audit"
-                                asp-action="Index">Auditoria</a>
                         </li>
                     </ul>
                     <form asp-controller="Auth" asp-action="logout" class="form-inline text-muted">
@@ -60,6 +56,7 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+    @await Component.InvokeAsync("NToastNotify")
 </body>
 
 </html>
