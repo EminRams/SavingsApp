@@ -71,9 +71,11 @@ namespace SavingsApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(int AccountId, string type, decimal amount)
+        public async Task<IActionResult> Create(int AccountId, string type, decimal amount, DateTime? transactionDate)
         {
             var account = await _context.SavingsAccounts.FindAsync(AccountId);
+
+            transactionDate ??= DateTime.Now;
 
             if (account == null)
                 return NotFound();
@@ -87,12 +89,10 @@ namespace SavingsApp.Controllers
             if (type == "withdrawal")
             {
                 // Validar que no supere $5000 diarios
-                var today = DateTime.Today;
-
                 var todayWithdrawals = await _context.Transactions
                     .Where(t => t.SavingsAccountId == AccountId &&
                                 t.Type == "withdrawal" &&
-                                t.TransactionDate.Date == today)
+                                t.TransactionDate.Date == transactionDate)
                     .SumAsync(t => t.Amount);
 
                 if (todayWithdrawals + amount > 5000)
@@ -120,7 +120,8 @@ namespace SavingsApp.Controllers
             {
                 SavingsAccountId = AccountId,
                 Amount = amount,
-                Type = type
+                Type = type,
+                TransactionDate = transactionDate.Value
             };
 
 

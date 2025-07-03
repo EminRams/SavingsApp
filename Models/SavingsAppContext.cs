@@ -13,8 +13,6 @@ public partial class SavingsAppContext : DbContext
     {
     }
 
-    public virtual DbSet<AuditLog> AuditLogs { get; set; }
-
     public virtual DbSet<Customer> Customers { get; set; }
 
     public virtual DbSet<SavingsAccount> SavingsAccounts { get; set; }
@@ -39,26 +37,6 @@ public partial class SavingsAppContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<AuditLog>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PK__AuditLog__3213E83F6BF21548");
-
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.Action)
-                .HasMaxLength(100)
-                .HasColumnName("action");
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnName("created_at");
-            entity.Property(e => e.CustomerId).HasColumnName("customer_id");
-            entity.Property(e => e.Details)
-                .HasMaxLength(200)
-                .HasColumnName("details");
-
-            entity.HasOne(d => d.Customer).WithMany(p => p.AuditLogs)
-                .HasForeignKey(d => d.CustomerId)
-                .HasConstraintName("FK__AuditLogs__custo__5DCAEF64");
-        });
 
         modelBuilder.Entity<Customer>(entity =>
         {
