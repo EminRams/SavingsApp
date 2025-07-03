@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using NToastNotify;
-using SavingsApp.Data;
+using SavingsApp.Database;
 using SavingsApp.Models;
 
 var builder = WebApplication.CreateBuilder(args);

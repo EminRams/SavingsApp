@@ -1,6 +1,6 @@
 using SavingsApp.Models;
 
-namespace SavingsApp.Data
+namespace SavingsApp.Database
 {
     public static class DataSeeder
     {
