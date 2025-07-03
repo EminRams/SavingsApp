@@ -4,9 +4,9 @@
     ViewData["Title"] = "Cuentas de " + Model.Name;
 }
 
-<h2>Información del Cliente</h2>
+<h2 class="mt-lg-4">Información del Cliente</h2>
 
-<div class="card mb-4 shadow-sm">
+<div class="card mb-4 mt-2 shadow">
     <div class="card-body">
         <h5 class="card-title mb-4"><i class="bi bi-person-circle fs-2"></i> @Model.Name</h5>
         <p class="card-text"><strong>Identificación:</strong> @Model.Identification</p>
@@ -16,24 +16,32 @@
 </div>
 
 <div class="d-flex justify-content-between align-items-center mt-lg-5">
-    <h2>Cuentas Asociadas</h2>
+    <h2>Cuentas de Ahorro</h2>
 
-    <a class="btn btn-primary" asp-asp-controller="Accounts" asp-action="Create">Crear Cuenta</a>
+    <a class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModal">Crear Cuenta</a>
 </div>
 
 @if (Model.SavingsAccounts != null && Model.SavingsAccounts.Any())
 {
-    <div class="row row-cols-1 row-cols-md-2 g-4">
+    <div class="row row-cols-1 row-cols-md-3 g-2 mt-2">
         @foreach (var account in Model.SavingsAccounts)
         {
             <div class="col">
-                <div class="card h-100 border-primary shadow-sm">
+                <div class="card h-100 border-primary shadow">
                     <div class="card-body">
-                        <h5 class="card-title">Cuenta: @account.AccountNumber</h5>
+                        <h5 class="card-title pb-3">Número de Cuenta: @account.AccountNumber</h5>
                         <p class="card-text">
-                            <strong>Saldo:</strong> L. @account.Balance.ToString("N2") <br />
-                            <strong>ID Cuenta:</strong> @account.Id
+                            <strong>Balance:</strong> L. @account.Balance.ToString("N2") <br />
+                            @if (!string.IsNullOrEmpty(account.Description))
+                            {
+                                <strong>Descripción:</strong>
+                                @account.Description
+                            }
                         </p>
+                        <a class="btn btn-outline-success" asp-controller="Transaction" action="Create"
+                            asp-route-type="withdrawal">Depositar</a>
+                        <a class="btn btn-outline-danger" asp-controller="Transaction" action="Create"
+                            asp-route-type="withdrawal">Retirar</a>
                     </div>
                 </div>
             </div>
@@ -43,6 +51,8 @@
 else
 {
     <div class="alert alert-warning mt-3">
-        Este cliente no tiene cuentas asociadas.
+        Este cliente no tiene cuentas de ahorro.
     </div>
 }
+
+@await Html.PartialAsync("_CreateModal", Model.Id)

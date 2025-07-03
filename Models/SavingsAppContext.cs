@@ -99,9 +99,9 @@ public partial class SavingsAppContext : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnName("created_at");
             entity.Property(e => e.CustomerId).HasColumnName("customer_id");
-            entity.Property(e => e.Status)
-                .HasDefaultValue(true)
-                .HasColumnName("status");
+            entity.Property(e => e.Description)
+                .HasMaxLength(255)
+                .HasColumnName("description");
 
             entity.HasOne(d => d.Customer).WithMany(p => p.SavingsAccounts)
                 .HasForeignKey(d => d.CustomerId)

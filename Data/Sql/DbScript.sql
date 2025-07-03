@@ -27,7 +27,7 @@ CREATE TABLE SavingsAccounts (
     customer_id INT NOT NULL,
     account_number NVARCHAR(20) NOT NULL UNIQUE,
     balance DECIMAL(18, 6) NOT NULL DEFAULT 0,
-    status BIT NOT NULL DEFAULT 1,
+    description varchar(255) NULL,
     created_at DATETIME2 DEFAULT GETDATE(),
     FOREIGN KEY (customer_id) REFERENCES Customers(id)
 );

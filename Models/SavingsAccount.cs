@@ -10,7 +10,7 @@ public partial class SavingsAccount
 
     public decimal Balance { get; set; }
 
-    public bool Status { get; set; }
+    public string? Description { get; set; }
 
     public DateTime? CreatedAt { get; set; }
 

@@ -36,19 +36,41 @@ namespace SavingsApp.Controllers
             return View(customer);
         }
 
-        [HttpGet]
-        public IActionResult Create()
+        [HttpPost]
+        public async Task<IActionResult> Create(int? customerId, string? description)
         {
-            return View();
+            var customer = await _context.Customers.FindAsync(customerId);
+            if (customer == null)
+            {
+                return NotFound();
+            }
+
+            var account = new SavingsAccount
+            {
+                CustomerId = customer.Id,
+                AccountNumber = GenerateAccountNumber(_context),
+                Description = description,
+                Balance = 0
+            };
+
+            _context.SavingsAccounts.Add(account);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Details", new { id = customer.Id });
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Create(SavingsAccount account)
+        public static string GenerateAccountNumber(SavingsAppContext context)
         {
-            // Falta logica por implementar...
-            await _context.SavingsAccounts.AddAsync(account);
+            // Generar un número de cuenta aleatorio
+            var random = new Random();
+            string accountNumber;
+            do
+            {
+                // Verificar que no haya duplicados
+                accountNumber = random.Next(100000000, 999999999).ToString();
+            } while (context.SavingsAccounts.Any(a => a.AccountNumber == accountNumber));
 
-            return RedirectToAction("Index", "Home");
+            return accountNumber;
         }
     }
 }
