@@ -1,0 +1,35 @@
+@model SavingsApp.Models.SavingsAccount
+
+@{
+    var transactionType = ViewData["TransactionType"]?.ToString();
+    var modalId = $"{transactionType}Modal-{Model.Id}";
+    var title = transactionType == "deposit" ? "Realizar Depósito" : "Realizar Retiro";
+    var buttonClass = transactionType == "deposit" ? "btn-success" : "btn-danger";
+    var action = "Create";
+}
+
+<div class="modal fade" id="@modalId" tabindex="-1" aria-labelledby="@modalId-Label" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-controller="Transaction" asp-action="@action">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="@modalId-Label">@title</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="AccountId" value="@Model.Id" />
+                    <input type="hidden" name="Type" value="@transactionType" />
+
+                    <div class="mb-3">
+                        <label for="amount" class="form-label">Monto</label>
+                        <input type="number" name="Amount" class="form-control" min="0.01" step="0.01" required />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn @buttonClass">Confirmar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -45,13 +45,25 @@
                                 @account.Description
                             }
                         </p>
-                        <a class="btn btn-outline-success" asp-controller="Transaction" action="Create"
-                            asp-route-type="withdrawal">Depositar</a>
-                        <a class="btn btn-outline-danger" asp-controller="Transaction" action="Create"
-                            asp-route-type="withdrawal">Retirar</a>
+
+                        <a class="btn btn-outline-success" data-bs-toggle="modal"
+                            data-bs-target="#depositModal-@account.Id">Depositar</a>
+                        <a class="btn btn-outline-danger" data-bs-toggle="modal"
+                            data-bs-target="#withdrawalModal-@account.Id">Retirar</a>
 
                         @* modal de edición *@
                         @await Html.PartialAsync("_EditModal", account)
+
+                        @* modales de transacción *@
+                        @{
+                            ViewData["TransactionType"] = "deposit";
+                        }
+                        @await Html.PartialAsync("_TransactionModal", account)
+                        @{
+                            ViewData["TransactionType"] = "withdrawal";
+                        }
+                        @await Html.PartialAsync("_TransactionModal", account)
+
                     </div>
                 </div>
             </div>

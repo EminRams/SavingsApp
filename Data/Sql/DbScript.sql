@@ -38,7 +38,7 @@ CREATE TABLE Transactions (
     savings_account_id INT NOT NULL,
     type NVARCHAR(10) NOT NULL CHECK (type IN ('deposit', 'withdrawal')),
     amount DECIMAL(18,6) NOT NULL CHECK (Amount > 0),
-    transaction_date DATETIME2 NOT NULL,
+    transaction_date DATETIME2 GETDATE() NOT NULL,
     created_at DATETIME2 DEFAULT GETDATE(),
     FOREIGN KEY (savings_account_id) REFERENCES SavingsAccounts(id)
 );
