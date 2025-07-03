@@ -48,10 +48,10 @@
                         @Html.DisplayFor(modelItem => item.SavingsAccount.Customer!.Name)
                     </td>
                     <td>
-                        @Html.DisplayFor(modelItem => item.Amount)
+                        <strong>$@item.Amount.ToString("N6")</strong>
                     </td>
                     <td>
-                        <strong>@item.BalanceAfterTransaction.ToString("C")</strong>
+                        <strong>$@item.BalanceAfterTransaction.ToString("N6")</strong>
                     </td>
                     <td>
                         @Html.DisplayFor(modelItem => item.TransactionDate, "{0:dd/MM/yyyy HH:mm:ss}")
