@@ -1,4 +1,4 @@
-#  Regivit SavingsApp
+#  ERamos SavingsApp
 
 Aplicación web para la gestión de clientes y cuentas de ahorro. Permite a operadores bancarios realizar acciones como crear cuentas, registrar transacciones (depósitos y retiros), y consultar el historial de operaciones, todo desde una interfaz amigable y segura.
 
